@@ -17,41 +17,49 @@ core = EndoRegulatedCore(noise_level=0.15)
 
 def text_to_embedding(text):
     """
-    Convertit un texte en embedding 12D via l'IA endorégulée.
+    Convertit un texte en embedding 12D unique.
+    Utilise le hash du texte pour moduler les pentades.
     """
     try:
-        # 1. Hash du texte (plus robuste)
+        # Hash du texte pour obtenir des valeurs uniques
         hash_val = 0
         for i, char in enumerate(text):
             hash_val = (hash_val * 31 + ord(char)) % 64
         
-        # 2. Utiliser aussi la longueur du texte
-        length_mod = len(text) % 7
-        
-        # 3. Combiner pour obtenir une valeur 0-63
-        combined = (hash_val + length_mod * 3) % 64
-        
-        # Injecter dans le core
-        attractor = core.encode_bits(combined)
-        
-        # Récupérer les modes des pentades
+        # Utiliser le hash pour créer un embedding unique
+        # On module chaque pentade par le hash
         embedding = []
+        
+        # Pentades P1 à P6
         for i in range(1, 7):
-            embedding.append(core.pentad_sign[f'P{i}'])
+            base_val = core.pentad_sign[f'P{i}']
+            # Modulation par le hash et la position
+            mod = 1 if (hash_val + i * 2) % 3 != 0 else -1
+            embedding.append(base_val * mod)
+        
+        # Pentades N1 à N6
         for i in range(1, 7):
-            embedding.append(core.pentad_sign[f'N{i}'])
+            base_val = core.pentad_sign[f'N{i}']
+            mod = 1 if (hash_val + i * 3 + 1) % 3 != 0 else -1
+            embedding.append(base_val * mod)
         
         # Convertir en array numpy
         emb = np.array(embedding, dtype=np.float32)
         
-        # Ajouter un bruit dépendant du texte pour plus de variété
-        noise_seed = sum(ord(c) for c in text) % 100
+        # Ajouter un bruit dépendant du texte
+        noise_seed = hash_val % 100
         np.random.seed(noise_seed)
-        emb = emb + np.random.randn(12) * 0.05
-        np.random.seed(None)  # Réinitialiser le seed
+        emb = emb + np.random.randn(12) * 0.15
+        np.random.seed(None)
+        
+        # Normaliser pour rester dans [-1, 1]
+        emb = np.clip(emb, -1.0, 1.0)
         
         # Générer un embedding 768D pour comparaison
         emb_768d = np.random.randn(768)
+        
+        # Injecter dans le core pour faire évoluer le système
+        attractor = core.encode_bits(hash_val)
         
         return emb, emb_768d, attractor
     except Exception as e:
@@ -100,23 +108,19 @@ def visualize_embedding(text):
         # Graphique 2 : Visualisation 2D via PCA
         ax2 = axes[1]
         
-        # Utiliser une liste statique pour la PCA
         if not hasattr(visualize_embedding, 'points_cache'):
             visualize_embedding.points_cache = []
         
-        # Ajouter le point courant
         visualize_embedding.points_cache.append(emb_12d)
         if len(visualize_embedding.points_cache) > 20:
             visualize_embedding.points_cache.pop(0)
         
-        # PCA sur les points
         if len(visualize_embedding.points_cache) >= 3:
             try:
                 points = np.array(visualize_embedding.points_cache)
                 pca = PCA(n_components=2)
                 points_2d = pca.fit_transform(points)
                 
-                # Afficher les points
                 ax2.scatter(points_2d[:-1, 0], points_2d[:-1, 1], 
                            c='gray', alpha=0.5, s=40, label='Historique')
                 ax2.scatter(points_2d[-1, 0], points_2d[-1, 1], 
@@ -138,7 +142,6 @@ def visualize_embedding(text):
         
         plt.tight_layout()
         
-        # Informations textuelles
         info_text = (
             f"**Analyse du texte :** `{text[:50]}{'...' if len(text)>50 else ''}`\n\n"
             f"**Attracteur :** {attractor}\n"
@@ -152,9 +155,7 @@ def visualize_embedding(text):
             f"**Entrées traitées :** {core.input_counter}"
         )
         
-        # Fermer la figure pour éviter les fuites mémoire
         plt.close(fig)
-        
         return fig, info_text
     
     except Exception as e:
@@ -167,10 +168,9 @@ def create_interface():
         gr.Markdown("""
         # 🧠 Tian-Dao Embeddings Demo
         ### IA Endorégulée - Invariant 64→12 avec Wuxing Cycle
-        
-        Cette démo transforme votre texte en un embedding 12D via une **IA endorégulée**.
-        Le système alterne entre les régimes **SHENG** (exploration) et **KE** (contraction)
-        selon l'asymétrie spectrale η.
+
+        Cette démo transforme votre texte en un embedding 12D unique.
+        Le système alterne entre les régimes **SHENG** (exploration) et **KE** (contraction).
         """)
         
         with gr.Row():
@@ -205,7 +205,6 @@ def create_interface():
             return visualize_embedding(text)
         
         def clear_text():
-            # Réinitialiser le cache
             if hasattr(visualize_embedding, 'points_cache'):
                 visualize_embedding.points_cache = []
             return "", None, "Entrez un nouveau texte pour générer un embedding."
@@ -229,7 +228,6 @@ def create_interface():
     
     return demo
 
-# Point d'entrée
 demo = create_interface()
 
 if __name__ == "__main__":
