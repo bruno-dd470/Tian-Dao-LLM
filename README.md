@@ -33,13 +33,19 @@ pip install -r requirements.txt
 python code/embeddings_20d.py
 ```
 
-## 🌐 **Gradio Demo**
+# 🧠 Tian-Dao LLM - Embeddings Endorégulés
 
 ## 🚀 Démo en ligne
 
-Vous pouvez tester l'application directement sur Hugging Face Spaces :
-👉 **[Tian-Dao-LLM Demo](https://huggingface.co/spaces/WaltDod/Gradio)**
-*Visualize 20D embeddings vs. 768D in real-time.*
+[![Hugging Face Space](https://img.shields.io/badge/🤗%20Hugging%20Face-Open%20Demo-blue?style=for-the-badge)](https://huggingface.co/spaces/WaltDod/Gradio)
+
+👆 **Cliquez sur le badge ci-dessus** pour tester la démo interactive.
+
+---
+
+## 📝 Description
+
+Cette application transforme un texte en un embedding 12D via une IA endorégulée...
 
 ## 📚 **Theory & Related Work**
 - **Tian-Dao Hub**: [bruno-dd470/Tian-Dao](https://github.com/bruno-dd470/Tian-Dao-AI)
