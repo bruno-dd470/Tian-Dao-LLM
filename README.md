@@ -1,3 +1,15 @@
+---
+title: Tian-Dao-LLM Demo
+emoji: 🤖
+colorFrom: blue
+colorTo: indigo
+sdk: gradio
+sdk_version: "5.0.0"
+python_version: "3.10"
+app_file: app.py
+pinned: false
+---
+
 # Tian-Dao-LLM: 20D Embeddings for Language Models
 **Part of the [Tian-Dao Unified Framework](https://github.com/bruno-dd470/Tian-Dao)**
 
