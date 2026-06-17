@@ -1,7 +1,6 @@
 numpy>=1.21.0
 torch>=1.10.0
 scikit-learn>=1.0.0
-gradio==5.23.1
 transformers>=4.0
 matplotlib>=3.5.0
 jq>=1.6
