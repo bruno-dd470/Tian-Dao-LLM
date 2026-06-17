@@ -9,7 +9,7 @@ import os
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 # Importer votre IA endorégulée
-from Endoregulated_AI_v2.5 import EndoRegulatedCore, RandomInputSimulator
+from Endoregulated_AI_v2.6 import EndoRegulatedCore, RandomInputSimulator
 
 # Initialiser le core une fois (global)
 core = EndoRegulatedCore(noise_level=0.15)
