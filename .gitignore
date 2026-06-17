@@ -24,9 +24,11 @@ MANIFEST
 # Environnements virtuels
 env/
 venv/
+venvs/
 ENV/
 env.bak/
 venv.bak/
+venvs.bak/
 
 # IDE
 .idea/
@@ -37,3 +39,5 @@ venv.bak/
 # OS
 .DS_Store
 Thumbs.db
+
+**/Trash/
