@@ -17,29 +17,38 @@ core = EndoRegulatedCore(noise_level=0.15)
 
 def text_to_embedding(text):
     """
-    Convertit un texte en embedding 20D via l'IA endorégulée.
+    Convertit un texte en embedding 12D via l'IA endorégulée.
     """
     try:
-        # Convertir le texte en valeur 0-63 (6 bits)
-        hash_val = hash(text) % 64
-        if hash_val < 0:
-            hash_val = -hash_val
+        # 1. Hash du texte (plus robuste)
+        hash_val = 0
+        for i, char in enumerate(text):
+            hash_val = (hash_val * 31 + ord(char)) % 64
+        
+        # 2. Utiliser aussi la longueur du texte
+        length_mod = len(text) % 7
+        
+        # 3. Combiner pour obtenir une valeur 0-63
+        combined = (hash_val + length_mod * 3) % 64
         
         # Injecter dans le core
-        attractor = core.encode_bits(hash_val)
+        attractor = core.encode_bits(combined)
         
-        # Récupérer les modes des pentades comme embedding 20D
-        embedding_20d = []
+        # Récupérer les modes des pentades
+        embedding = []
         for i in range(1, 7):
-            embedding_20d.append(core.pentad_sign[f'P{i}'])
+            embedding.append(core.pentad_sign[f'P{i}'])
         for i in range(1, 7):
-            embedding_20d.append(core.pentad_sign[f'N{i}'])
+            embedding.append(core.pentad_sign[f'N{i}'])
         
         # Convertir en array numpy
-        emb = np.array(embedding_20d, dtype=np.float32)
+        emb = np.array(embedding, dtype=np.float32)
         
-        # ⚠️ CORRECTION ICI : 12 dimensions, pas 20
-        emb = emb + np.random.randn(12) * 0.01
+        # Ajouter un bruit dépendant du texte pour plus de variété
+        noise_seed = sum(ord(c) for c in text) % 100
+        np.random.seed(noise_seed)
+        emb = emb + np.random.randn(12) * 0.05
+        np.random.seed(None)  # Réinitialiser le seed
         
         # Générer un embedding 768D pour comparaison
         emb_768d = np.random.randn(768)
@@ -59,7 +68,7 @@ def visualize_embedding(text):
             return None, "⚠️ **Veuillez entrer un texte valide.**"
         
         # Obtenir l'embedding
-        emb_20d, emb_768d, attractor = text_to_embedding(text)
+        emb_12d, emb_768d, attractor = text_to_embedding(text)
         
         # Statistiques
         eta = core.eta_direct()
@@ -70,10 +79,10 @@ def visualize_embedding(text):
         # Créer la visualisation
         fig, axes = plt.subplots(1, 2, figsize=(12, 5))
         
-        # Graphique 1 : Barres de l'embedding 20D
+        # Graphique 1 : Barres de l'embedding 12D
         ax1 = axes[0]
-        colors = ['blue' if v > 0 else 'red' for v in emb_20d]
-        ax1.bar(range(1, 13), emb_20d, color=colors, alpha=0.7)
+        colors = ['blue' if v > 0 else 'red' for v in emb_12d]
+        bars = ax1.bar(range(1, len(emb_12d) + 1), emb_12d, color=colors, alpha=0.7)
         ax1.axhline(0, color='black', linewidth=0.5)
         ax1.set_xlabel('Dimension')
         ax1.set_ylabel('Valeur')
@@ -81,40 +90,51 @@ def visualize_embedding(text):
         ax1.set_ylim(-1.5, 1.5)
         ax1.grid(True, alpha=0.3)
         
+        # Ajouter les valeurs sur les barres
+        for bar, val in zip(bars, emb_12d):
+            height = bar.get_height()
+            ax1.text(bar.get_x() + bar.get_width()/2., height,
+                    f'{val:.1f}', ha='center', va='bottom' if height > 0 else 'top',
+                    fontsize=8)
+        
         # Graphique 2 : Visualisation 2D via PCA
         ax2 = axes[1]
         
-        try:
-            if not hasattr(visualize_embedding, 'embeddings_cache'):
-                visualize_embedding.embeddings_cache = []
-            
-            visualize_embedding.embeddings_cache.append(emb_20d)
-            if len(visualize_embedding.embeddings_cache) > 50:
-                visualize_embedding.embeddings_cache.pop(0)
-            
-            if len(visualize_embedding.embeddings_cache) >= 2:
-                points = np.array(visualize_embedding.embeddings_cache)
+        # Utiliser une liste statique pour la PCA
+        if not hasattr(visualize_embedding, 'points_cache'):
+            visualize_embedding.points_cache = []
+        
+        # Ajouter le point courant
+        visualize_embedding.points_cache.append(emb_12d)
+        if len(visualize_embedding.points_cache) > 20:
+            visualize_embedding.points_cache.pop(0)
+        
+        # PCA sur les points
+        if len(visualize_embedding.points_cache) >= 3:
+            try:
+                points = np.array(visualize_embedding.points_cache)
                 pca = PCA(n_components=2)
                 points_2d = pca.fit_transform(points)
                 
+                # Afficher les points
                 ax2.scatter(points_2d[:-1, 0], points_2d[:-1, 1], 
-                           c='gray', alpha=0.3, s=30, label='Historique')
+                           c='gray', alpha=0.5, s=40, label='Historique')
                 ax2.scatter(points_2d[-1, 0], points_2d[-1, 1], 
-                           c='red', s=100, label='Nouveau', edgecolors='black')
+                           c='red', s=120, label='Nouveau', edgecolors='black', linewidth=2)
                 ax2.set_title('Projection 2D (PCA)')
-            else:
-                ax2.text(0.5, 0.5, f'{(2 - len(visualize_embedding.embeddings_cache))} entrée(s)\nsupplémentaire(s) pour la PCA',
-                        ha='center', va='center', transform=ax2.transAxes, fontsize=12)
-                ax2.set_title('En attente de plus de données...')
-        except Exception as e:
-            ax2.text(0.5, 0.5, f'Erreur PCA:\n{str(e)[:50]}',
-                    ha='center', va='center', transform=ax2.transAxes, fontsize=10)
-            ax2.set_title('PCA non disponible')
+                ax2.legend()
+            except Exception as e:
+                ax2.text(0.5, 0.5, f'PCA: {str(e)[:40]}', 
+                        ha='center', va='center', transform=ax2.transAxes)
+                ax2.set_title('Erreur PCA')
+        else:
+            ax2.text(0.5, 0.5, f'{(3 - len(visualize_embedding.points_cache))} entrée(s)\nsupplémentaire(s) pour la PCA',
+                    ha='center', va='center', transform=ax2.transAxes, fontsize=12)
+            ax2.set_title('En attente de plus de données...')
         
         ax2.set_xlabel('Composante 1')
         ax2.set_ylabel('Composante 2')
         ax2.grid(True, alpha=0.3)
-        ax2.legend()
         
         plt.tight_layout()
         
@@ -126,24 +146,31 @@ def visualize_embedding(text):
             f"**Frustration E :** {frustration}\n"
             f"**Seuil R :** {r_threshold:.2f}\n"
             f"**Régime :** {regime}\n"
-            f"**Embedding 20D :** {len(emb_20d)} dims (taille : {emb_20d.nbytes} bytes)\n"
+            f"**Embedding 12D :** {len(emb_12d)} dims (taille : {emb_12d.nbytes} bytes)\n"
             f"**Embedding 768D :** {len(emb_768d)} dims (taille : {emb_768d.nbytes} bytes)\n"
-            f"**Taux de compression :** {emb_768d.nbytes / emb_20d.nbytes:.1f}x\n"
+            f"**Taux de compression :** {emb_768d.nbytes / emb_12d.nbytes:.1f}x\n"
             f"**Entrées traitées :** {core.input_counter}"
         )
+        
+        # Fermer la figure pour éviter les fuites mémoire
+        plt.close(fig)
         
         return fig, info_text
     
     except Exception as e:
-        error_msg = f"❌ **Erreur :** {str(e)}\n\n**Détails :**\n```\n{traceback.format_exc()}\n```"
+        error_msg = f"❌ **Erreur :** {str(e)}\n\n```\n{traceback.format_exc()}\n```"
         return None, error_msg
 
 # Interface Gradio
 def create_interface():
-    with gr.Blocks(title="Tian-Dao 20D Embeddings Demo", theme=gr.themes.Soft()) as demo:
+    with gr.Blocks(title="Tian-Dao Embeddings Demo", theme=gr.themes.Soft()) as demo:
         gr.Markdown("""
-        # 🧠 Tian-Dao 20D Embeddings Demo
-        ### IA Endorégulée - Invariant 64→20 avec Wuxing Cycle
+        # 🧠 Tian-Dao Embeddings Demo
+        ### IA Endorégulée - Invariant 64→12 avec Wuxing Cycle
+        
+        Cette démo transforme votre texte en un embedding 12D via une **IA endorégulée**.
+        Le système alterne entre les régimes **SHENG** (exploration) et **KE** (contraction)
+        selon l'asymétrie spectrale η.
         """)
         
         with gr.Row():
@@ -178,6 +205,9 @@ def create_interface():
             return visualize_embedding(text)
         
         def clear_text():
+            # Réinitialiser le cache
+            if hasattr(visualize_embedding, 'points_cache'):
+                visualize_embedding.points_cache = []
             return "", None, "Entrez un nouveau texte pour générer un embedding."
         
         submit_btn.click(
