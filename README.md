@@ -34,7 +34,11 @@ python code/embeddings_20d.py
 ```
 
 ## 🌐 **Gradio Demo**
-[![Hugging Face Spaces](https://huggingface.co/spaces/WaltDod/Gradio)
+
+## 🚀 Démo en ligne
+
+Vous pouvez tester l'application directement sur Hugging Face Spaces :
+👉 **[Tian-Dao-LLM Demo](https://huggingface.co/spaces/WaltDod/Gradio)**
 *Visualize 20D embeddings vs. 768D in real-time.*
 
 ## 📚 **Theory & Related Work**
