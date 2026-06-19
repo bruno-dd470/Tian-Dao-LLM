@@ -3,7 +3,7 @@ title: Tian-Dao Embeddings
 emoji: 🧠
 colorFrom: blue
 colorTo: purple
-sdk: docker
+sdk: gradio
 app_file: app.py
 pinned: false
 license: cc-by-4.0
