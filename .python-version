@@ -1,0 +1,2 @@
+# Forcer Python 3.11
+echo "3.11" > .python-version

@@ -4,5 +4,3 @@ scipy>=1.7.0
 matplotlib>=3.5.0
 networkx>=2.8.0
 gradio>=4.0.0
-pyaudioop>=0.1.0
-
