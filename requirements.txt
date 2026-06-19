@@ -4,8 +4,3 @@ scipy>=1.7.0
 matplotlib>=3.5.0
 networkx>=2.8.0
 gradio>=4.0.0
-
-# Optionnel : pour le benchmark DistilBERT
-# torch>=1.10.0
-# transformers>=4.0
-# sentence-transformers>=2.2.0
