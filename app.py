@@ -293,4 +293,4 @@ demo = create_interface()
 
 if __name__ == "__main__":
     # [P3] Gradio 6.0 : theme passé à launch()
-    demo.launch(theme=gr.themes.Soft())
+    demo.launch()
