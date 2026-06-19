@@ -11,7 +11,7 @@ COPY requirements.txt .
 RUN pip install --no-cache-dir \
     "huggingface_hub<0.25" \
     -r requirements.txt \
-    gradio==4.44.0 \
+    gradio==4.44.1 \
     "uvicorn>=0.14.0" \
     "websockets>=10.4" \
     spaces
