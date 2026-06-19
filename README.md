@@ -14,15 +14,15 @@ license: cc-by-4.0
 **Endoregulated AI based on Wuxing philosophy and algebraic topology**
 **基于五行哲学与代数拓扑的自调节人工智能**
 
-[![Tests](https://img.shields.io/badge/tests-73%20passed-brightgreen)]()
-[![Version](https://img.shields.io/badge/version-2.7-blue)]()
-[![Python](https://img.shields.io/badge/python-3.11+-blue)]()
-[![License](https://img.shields.io/badge/license-CC--BY--4.0-green)]()
-[![Languages](https://img.shields.io/badge/languages-EN%20%7C%20中文-orange)]()
+[![Tests](https://img.shields.io/badge/tests-73%20passed-brightgreen)](https://github.com/bruno-dd470/Tian-Dao-LLM/tree/main/tests)
+[![Version](https://img.shields.io/badge/version-2.7-blue)](https://github.com/bruno-dd470/Tian-Dao-LLM/releases)
+[![Python](https://img.shields.io/badge/python-3.11+-blue)](https://www.python.org/downloads/)
+[![License](https://img.shields.io/badge/license-CC--BY--4.0-green)](https://creativecommons.org/licenses/by/4.0/)
+[![Languages](https://img.shields.io/badge/languages-EN%20%7C%20中文-orange)](#-description--描述)
 
 ## 🚀 Live Demo / 在线演示
 
-[![Hugging Face](https://img.shields.io/badge/🤗%20Hugging%20Face-Open%20Demo-blue?style=for-the-badge)](https://huggingface.co/spaces/VOTRE_USERNAME/tian-dao-embeddings)
+[![Hugging Face](https://img.shields.io/badge/🤗%20Hugging%20Face-Open%20Demo-blue?style=for-the-badge)](https://huggingface.co/spaces/WaltDod/Gradio)
 
 👆 Click the badge above to try the interactive demo.
 👆 点击上方徽章体验交互式演示。
@@ -353,7 +353,7 @@ pip install pytest
 
 ## 📧 Contact / 联系
 
-For collaboration / 合作请联系: [dod60@gmx.fr](mailto:dod60@gmx.fr)
+For collaboration / 合作请联系: [dod60@gmx.fr](mailto:dod60@gmx.fr)(mailto:dod60@gmx.fr)
 
 ---
 
