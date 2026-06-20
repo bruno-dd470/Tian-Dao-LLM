@@ -33,7 +33,7 @@ license: cc-by-4.0
 
 ### 🇬🇧 English
 
-This application transforms text into a 12D embedding via an **endoregulated AI** inspired by the principles of Wuxing (Chinese philosophy of the 5 phases) and algebraic topology.
+This application transforms text into a 20D embedding via an **endoregulated AI** inspired by the principles of Wuxing (Chinese philosophy of the 5 phases) and algebraic topology.
 
 Unlike traditional embedding models (BERT, SBERT, etc.), this approach:
 - ✅ **Requires no supervised training**
@@ -41,11 +41,11 @@ Unlike traditional embedding models (BERT, SBERT, etc.), this approach:
 - ✅ **Produces interpretable embeddings** (each dimension = a Wuxing attractor)
 - ✅ **Self-regulates** via an equilibrium cycle between exploration (SHENG) and contraction (KE)
 
-The system projects 6-bit inputs (0-63) into a 12-dimensional space via a network of attractors organized as a Merkabah.
+The system projects 6-bit inputs (0-63) into a 20-dimensional space via a network of attractors organized as a Merkabah.
 
 ### 🇨🇳 中文
 
-本应用通过受**五行哲学**（中国五阶段哲学）与**代数拓扑**启发的**自调节人工智能**，将文本转换为 12 维嵌入向量。
+本应用通过受**五行哲学**（中国五阶段哲学）与**代数拓扑**启发的**自调节人工智能**，将文本转换为 20 维嵌入向量。
 
 与传统的嵌入模型（BERT、SBERT 等）不同，本方法：
 - ✅ **无需监督训练**
@@ -53,7 +53,7 @@ The system projects 6-bit inputs (0-63) into a 12-dimensional space via a networ
 - ✅ **生成可解释的嵌入**（每个维度 = 一个五行吸引子）
 - ✅ **通过探索（生 SHENG）与收缩（克 KE）之间的平衡循环实现自调节**
 
-系统通过以梅尔卡巴（Merkabah）结构组织的吸引子网络，将 6 位输入（0-63）投影到 12 维空间。
+系统通过以梅尔卡巴（Merkabah）结构组织的吸引子网络，将 6 位输入（0-63）投影到 20 维空间。
 
 ---
 

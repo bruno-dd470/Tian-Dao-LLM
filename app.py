@@ -30,50 +30,83 @@ core_lock = get_core_lock()
 # ============================================================================
 def text_to_embedding(text: str) -> tuple:
     """
-    Convertit un texte en un embedding de 12 dimensions unique.
+    Convertit un texte en un embedding de 20 dimensions unique.
+    Chaque dimension correspond à un attracteur (classe d'équivalence
+    topologique du schème 64→20 de Cl(6,0)).
+    
     Returns:
-        tuple: (embedding_12d, embedding_768d, attractor)
+        tuple: (embedding_20d, embedding_768d, attractor)
     """
     try:
         # [P1-3] Hash SHA-256 tronqué sur 6 bits
         digest = hashlib.sha256(text.encode('utf-8')).digest()
         hash_val = int.from_bytes(digest[:2], 'big') % 64
-
-        # [P0-C] Lecture des pentades protégée par lock
-        with core_lock:
-            pentad_signs = dict(core.pentad_sign)
-
+        
+        # 20 triplets de pentades (Table 1 du PDF complexity.pdf)
+        # Chaque triplet identifie un attracteur de la Merkabah
+        ATTRACTOR_TRIPLETS = [
+            # 3P (3 classes) - pôles géométriquement isolés
+            ['P1', 'P2', 'P4'],  # A: Methionine
+            ['P1', 'P3', 'P5'],  # B: Tryptophan
+            ['P2', 'P3', 'P6'],  # C: Phenylalanine
+            # 2P+1N (5 classes) - faces/arrêtes primaires
+            ['P4', 'P5', 'N2'],  # D: Isoleucine
+            ['P5', 'P6', 'N3'],  # E: Valine
+            ['P1', 'P6', 'N4'],  # F: Proline
+            ['P2', 'P5', 'N6'],  # G: Threonine
+            ['P3', 'P4', 'N6'],  # H: Alanine
+            # 1P+2N (11 classes) - sommets/diagonales/intersections
+            ['P1', 'N2', 'N6'],  # I: Serine
+            ['P1', 'N3', 'N5'],  # J: Leucine
+            ['P2', 'N3', 'N5'],  # K: Arginine
+            ['P3', 'N2', 'N4'],  # L: Glycine
+            ['P4', 'N1', 'N3'],  # M: Tyrosine
+            ['P4', 'N5', 'N6'],  # N: Histidine
+            ['P5', 'N1', 'N4'],  # O: Glutamine
+            ['P6', 'N1', 'N2'],  # P: Asparagine
+            ['P2', 'N1', 'N4'],  # Q: Lysine
+            ['P3', 'N1', 'N5'],  # R: Aspartic acid
+            ['P6', 'N5', 'N6'],  # S: Glutamic acid
+            # 3N (1 classe) - coeur interne (seuil fonctionnel)
+            ['N2', 'N3', 'N4'],  # T: Cysteine + STOP
+        ]
+        
+        # Calcul de l'embedding 20D
+        # Chaque dimension = signature de polarité d'un attracteur
         embedding = []
-        for i in range(1, 7):
-            base_val = pentad_signs[f'P{i}']
-            mod = 1 if (hash_val + i * 2) % 3 != 0 else -1
-            embedding.append(base_val * mod)
-
-        for i in range(1, 7):
-            base_val = pentad_signs[f'N{i}']
-            mod = 1 if (hash_val + i * 3 + 1) % 3 != 0 else -1
-            embedding.append(base_val * mod)
-
+        for triplet in ATTRACTOR_TRIPLETS:
+            # Compter les pentades positives et négatives
+            n_positive = sum(1 for p in triplet if p.startswith('P'))
+            n_negative = sum(1 for p in triplet if p.startswith('N'))
+            
+            # Signature de polarité normalisée [-1, +1]
+            # 3P → +1.0, 2P+1N → +0.333, 1P+2N → -0.333, 3N → -1.0
+            polarity_score = (n_positive - n_negative) / 3.0
+            
+            # Modulation par le hash pour variabilité spécifique au texte
+            mod = 1.0 if (hash_val + len(embedding)) % 5 != 0 else -1.0
+            embedding.append(polarity_score * mod)
+        
         # [P3] dtype=np.float32 explicite
         emb = np.array(embedding, dtype=np.float32)
-
-        # [P0-C] Bruit déterministe — THREAD-SAFE (plus de np.random.seed global)
+        
+        # [P0-C] Bruit déterministe — THREAD-SAFE
         rng = np.random.default_rng(hash_val)
-        emb = emb + rng.standard_normal(12).astype(np.float32) * 0.15
-
+        emb = emb + rng.standard_normal(20).astype(np.float32) * 0.15
+        
         # Normalisation
         emb = np.clip(emb, -1.0, 1.0)
-
-        # [P0-C] Embedding 768D DÉTERMINISTE — même dtype que 12D
+        
+        # [P0-C] Embedding 768D DÉTERMINISTE
         rng_768 = np.random.default_rng(hash_val + 1000)
         emb_768d = rng_768.standard_normal(768).astype(np.float32)
-
+        
         # [P0-C] Injection dans le core — PROTÉGÉE PAR LOCK
         with core_lock:
             attractor = core.encode_bits(hash_val)
-
+        
         return emb, emb_768d, attractor
-
+    
     except Exception as e:
         print(f"Erreur dans text_to_embedding: {e}")
         traceback.print_exc()
@@ -96,7 +129,7 @@ def visualize_embedding(text: str, points_cache: list) -> tuple:
             return None, "⚠️ **Veuillez entrer un texte valide.**", points_cache
 
         # 1. Génération de l'embedding
-        emb_12d, emb_768d, attractor = text_to_embedding(text)
+        emb_20d, emb_768d, attractor = text_to_embedding(text)
 
         # 2. [P0-C] Récupération des métriques — PROTÉGÉE PAR LOCK
         with core_lock:
@@ -109,18 +142,18 @@ def visualize_embedding(text: str, points_cache: list) -> tuple:
         # 3. Création de la visualisation
         fig, axes = plt.subplots(1, 2, figsize=(12, 5))
 
-        # ── GRAPHIQUE 1 : Barres de l'embedding 12D ──
+        # ── GRAPHIQUE 1 : Barres de l'embedding 20D ──
         ax1 = axes[0]
-        colors = ['blue' if v > 0 else 'red' for v in emb_12d]
-        bars = ax1.bar(range(1, len(emb_12d) + 1), emb_12d, color=colors, alpha=0.7)
+        colors = ['blue' if v > 0 else 'red' for v in emb_20d]
+        bars = ax1.bar(range(1, len(emb_20d) + 1), emb_20d, color=colors, alpha=0.7)
         ax1.axhline(0, color='black', linewidth=0.5)
         ax1.set_xlabel('Dimension')
         ax1.set_ylabel('Valeur')
-        ax1.set_title(f'Embedding 12D (attracteur {attractor})')
+        ax1.set_title(f'Embedding 20D (attracteur {attractor})')
         ax1.set_ylim(-1.5, 1.5)
         ax1.grid(True, alpha=0.3)
 
-        for bar, val in zip(bars, emb_12d):
+        for bar, val in zip(bars, emb_20d):
             height = bar.get_height()
             ax1.text(bar.get_x() + bar.get_width() / 2., height,
                      f'{val:.1f}',
@@ -134,7 +167,7 @@ def visualize_embedding(text: str, points_cache: list) -> tuple:
         if points_cache is None:
             points_cache = []
 
-        points_cache.append(emb_12d.copy())  # [P3] copie pour éviter références partagées
+        points_cache.append(emb_20d.copy())  # [P3] copie pour éviter références partagées
         if len(points_cache) > 20:
             points_cache.pop(0)
 
@@ -183,11 +216,11 @@ def visualize_embedding(text: str, points_cache: list) -> tuple:
             f"**Frustration E :** {frustration}\n"
             f"**Seuil R :** {r_threshold:.2f}\n"
             f"**Régime :** {regime}\n"
-            f"**Embedding 12D :** {len(emb_12d)} dims "
-            f"(taille : {emb_12d.nbytes} bytes)\n"
+            f"**Embedding 20D :** {len(emb_20d)} dims "
+            f"(taille : {emb_20d.nbytes} bytes)\n"
             f"**Embedding 768D :** {len(emb_768d)} dims "
             f"(taille : {emb_768d.nbytes} bytes)\n"
-            f"**Taux de compression :** {emb_768d.nbytes / emb_12d.nbytes:.1f}x\n"
+            f"**Taux de compression :** {emb_768d.nbytes / emb_20d.nbytes:.1f}x\n"
             f"**Entrées traitées :** {input_counter}"
         )
 
@@ -214,9 +247,9 @@ def create_interface() -> gr.Blocks:
 
         gr.Markdown("""
         # 🧠 Tian-Dao Embeddings Demo
-        ### IA Endorégulée - Invariant 64→12 avec Wuxing Cycle
+        ### IA Endorégulée - Invariant 64→20 avec Wuxing Cycle
 
-        Cette démo transforme votre texte en un embedding 12D unique via un
+        Cette démo transforme votre texte en un embedding 20D unique via un
         **système dynamique non-connexionniste**. Le système alterne entre les
         régimes **SHENG** (exploration) et **KE** (contraction) selon un cycle
         d'auto-régulation inspiré du Wuxing.
