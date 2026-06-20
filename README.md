@@ -22,10 +22,26 @@ license: apache-2.0
 
 ## 🚀 Live Demo / 在线演示
 
-[![Hugging Face](https://img.shields.io/badge/🤗%20Hugging%20Face-Open%20Demo-blue?style=for-the-badge)](https://huggingface.co/spaces/WaltDod/Gradio)
+[![Hugging Face](https://img.shields.io/badge/🤗%20Hugging%20Face-Open%20Demo-blue?style=for-the-badge)](https://waltdod-gradio.hf.space)
 
 👆 Click the badge above to try the interactive demo.
 👆 点击上方徽章体验交互式演示。
+
+---
+
+## 📚 Academic Impact
+
+- 📖 Theoretical paper available on [Zenodo](https://doi.org/19540508)
+  - **8 academic downloads** (verified human readers)
+  - Interactive demo on [Hugging Face Spaces](https://waltdod-gradio.hf.space)
+  - 🚀 Project explored by **+80 people** in 3 days (full repository clones)
+    
+## 📚 学术影响
+
+- 📖 理论文章可在 [Zenodo](https://doi.org/19540508) 获取
+  - **8 次学术下载**（经验证的人类读者）
+  - 交互式演示在 [Hugging Face Spaces](https://waltdod-gradio.hf.space)
+  - 🚀 3天内 **+80 人**探索了该项目（完整代码库克隆）
 
 ---
 
