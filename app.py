@@ -323,9 +323,6 @@ def visualize_embedding(text: str, points_cache: list, lang: str = 'fr') -> tupl
 # ============================================================================
 # INTERFACE GRADIO
 # ============================================================================
-# ============================================================================
-# INTERFACE GRADIO
-# ============================================================================
 def create_interface() -> gr.Blocks:
     """Crée l'interface Gradio pour la démonstration (bilingue FR/EN)."""
     with gr.Blocks(title="Tian-Dao Embeddings Demo") as demo:
@@ -333,7 +330,7 @@ def create_interface() -> gr.Blocks:
         points_state = gr.State(value=[])
         lang_state = gr.State(value="fr")
         
-        # Sélecteur de langue (en haut à droite)
+        # Sélecteur de langue
         with gr.Row():
             gr.Markdown("## 🧠 Tian-Dao")
             language_selector = gr.Dropdown(
@@ -344,7 +341,7 @@ def create_interface() -> gr.Blocks:
                 interactive=True
             )
         
-        # Titre et description (mis à jour dynamiquement)
+        # Titre et description
         title_md = gr.Markdown(f"# {_('title', 'fr')}\n{_('subtitle', 'fr')}")
         description_md = gr.Markdown(_("description", "fr"))
         
@@ -358,7 +355,7 @@ def create_interface() -> gr.Blocks:
                 submit_btn = gr.Button(_("submit_btn", "fr"), variant="primary")
                 clear_btn = gr.Button(_("clear_btn", "fr"))
                 
-                # ✅ Exemples sous forme de dropdown pour mise à jour dynamique
+                # ✅ Dropdown pour les exemples (dynamique)
                 examples_title_md = gr.Markdown(_("examples_title", "fr"))
                 examples_dropdown = gr.Dropdown(
                     choices=I18N["fr"]["examples"],
@@ -396,21 +393,21 @@ def create_interface() -> gr.Blocks:
             if current_text and current_text.strip():
                 fig, info, new_cache = visualize_embedding(current_text, points_cache, lang)
                 return (
-                    gr.update(value=new_title),               # title_md
-                    gr.update(value=new_description),         # description_md
-                    gr.update(label=_("text_label", lang),    # text_input
+                    gr.update(value=new_title),
+                    gr.update(value=new_description),
+                    gr.update(label=_("text_label", lang),
                               placeholder=_("text_placeholder", lang)),
-                    gr.update(value=_("submit_btn", lang)),   # submit_btn
-                    gr.update(value=_("clear_btn", lang)),    # clear_btn
-                    gr.update(choices=new_examples,           # examples_dropdown
+                    gr.update(value=_("submit_btn", lang)),
+                    gr.update(value=_("clear_btn", lang)),
+                    gr.update(choices=new_examples,
                               label=_("examples_label", lang)),
-                    gr.update(value=new_examples_title),      # examples_title_md
-                    gr.update(label=_("metrics_title", lang)), # metrics_accordion
-                    gr.update(value=info if info else _("stats_waiting", lang)), # stats_text
-                    gr.update(label=_("plot_label", lang)),   # plot_output
-                    fig,                                      # plot_output value
-                    lang,                                     # lang_state
-                    new_cache,                                # points_state
+                    gr.update(value=new_examples_title),
+                    gr.update(label=_("metrics_title", lang)),
+                    gr.update(value=info if info else _("stats_waiting", lang)),
+                    gr.update(label=_("plot_label", lang)),
+                    fig,
+                    lang,
+                    new_cache,
                 )
             else:
                 return (
@@ -457,6 +454,7 @@ def create_interface() -> gr.Blocks:
             outputs=text_input
         )
         
+        # ✅ Changement de langue avec mise à jour du dropdown
         language_selector.change(
             fn=change_language,
             inputs=[language_selector, text_input, points_state],
