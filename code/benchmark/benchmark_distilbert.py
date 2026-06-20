@@ -176,25 +176,7 @@ class TianDaoEncoder20D:
             n_positive = sum(1 for p in triplet if p.startswith('P'))
             n_negative = sum(1 for p in triplet if p.startswith('N'))
             
-            # Signature de polarité normalisée [-1, +1]
-            # 3P → +1.0, 2P+1N → +0.333, 1P+2N → -0.333, 3N → -1.0
-            polarity_score = (n_positive - n_negative) / 3.0
-            
-            # Modulation par le hash pour variabilité spécifique au texte
-            mod = 1.0 if (hash_val + len(embedding)) % 5 != 0 else -1.0
-            embedding.append(polarity_score * mod)
-        
-        # Convertir en array numpy
-        emb = np.array(embedding, dtype=np.float32)
-        
-        # Bruit déterministe (même logique que app.py)
-        rng = np.random.default_rng(hash_val)
-        emb = emb + rng.standard_normal(20).astype(np.float32) * 0.15
-        
-        # Normalisation et clipping
-        emb = np.clip(emb, -1.0, 1.0)
-        
-        return emb
+            # Signature de polarité normalisée [-1, +
 
     def encode_batch(self, texts: List[str]) -> np.ndarray:
         """Encode une liste de textes. Retourne un array (N, 20)."""
