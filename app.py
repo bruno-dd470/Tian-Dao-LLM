@@ -17,11 +17,11 @@ import traceback
 import sys
 import os
 
-# ✅ Supprimer les warnings asyncio pour Python 3.13
+# Supprimer les warnings asyncio pour Python 3.13
 warnings.filterwarnings("ignore", category=DeprecationWarning, module="asyncio")
 warnings.filterwarnings("ignore", category=RuntimeWarning, module="asyncio")
 
-# ✅ Patch pour le bug du file descriptor -1 sur Python 3.13
+# Patch pour le bug du file descriptor -1 sur Python 3.13
 if sys.version_info >= (3, 13):
     try:
         import selectors
@@ -43,24 +43,23 @@ if sys.version_info >= (3, 13):
 # Import direct depuis la racine
 from Endoregulated_AI_v27 import EndoRegulatedCore, RandomInputSimulator, get_core_lock
 
-# ============================================================================
+# =============================================================================
 # [P0-C] INITIALISATION GLOBALE THREAD-SAFE
-# ============================================================================
+# =============================================================================
 core = EndoRegulatedCore(noise_level=0.15, seed=42)
 core_lock = get_core_lock()
 
-
-# ============================================================================
+# =============================================================================
 # INTERNATIONALISATION (FR/EN)
-# ============================================================================
+# =============================================================================
 I18N = {
     "fr": {
         "title": "🧠 Démo Tian-Dao Embeddings",
         "subtitle": "### IA Endorégulée - Invariant 64→20 avec Cycle Wuxing",
         "description": (
             "Cette démo transforme votre texte en un embedding 20D unique via un "
-            "**système dynamique non-connexionniste**. Le système alterne entre les "
-            "régimes **SHENG** (exploration) et **KE** (contraction) selon un cycle "
+            "système dynamique non-connexionniste. Le système alterne entre les "
+            "régimes SHENG (exploration) et KE (contraction) selon un cycle "
             "d'auto-régulation inspiré du Wuxing."
         ),
         "language_label": "🌐 Langue",
@@ -69,7 +68,7 @@ I18N = {
         "submit_btn": "🔮 Générer l'embedding",
         "clear_btn": "🗑️ Effacer",
         "metrics_title": "📊 Métriques détaillées",
-        "stats_waiting": "**Statistiques :** en attente d'entrée...",
+        "stats_waiting": "Statistiques : en attente d'entrée...",
         "plot_label": "Visualisation de l'embedding",
         "examples_title": "### 📝 Exemples de textes",
         "examples_label": "Cliquez sur un exemple pour le charger",
@@ -81,17 +80,17 @@ I18N = {
             "La topologie des attracteurs révèle l'harmonie"
         ],
         "error_empty": "⚠️ Veuillez entrer un texte valide.",
-        "error_prefix": "❌ **Erreur :**",
-        "info_prefix": "**Analyse du texte :**",
-        "info_attractor": "**Attracteur :**",
-        "info_eta": "**Asymétrie η :**",
-        "info_frustration": "**Frustration E :**",
-        "info_threshold": "**Seuil R :**",
-        "info_regime": "**Régime :**",
-        "info_20d": "**Embedding 20D :**",
-        "info_768d": "**Embedding 768D :**",
-        "info_compression": "**Taux de compression :**",
-        "info_processed": "**Entrées traitées :**",
+        "error_prefix": "❌ Erreur :",
+        "info_prefix": "Analyse du texte :",
+        "info_attractor": "Attracteur :",
+        "info_eta": "Asymétrie η :",
+        "info_frustration": "Frustration E :",
+        "info_threshold": "Seuil R :",
+        "info_regime": "Régime :",
+        "info_20d": "Embedding 20D :",
+        "info_768d": "Embedding 768D :",
+        "info_compression": "Taux de compression :",
+        "info_processed": "Entrées traitées :",
         "dims": "dims",
         "size": "taille",
         "bytes": "bytes",
@@ -106,15 +105,15 @@ I18N = {
         "embedding_title": "Embedding 20D (attracteur {})",
         "dimension": "Dimension",
         "value": "Valeur",
-        "clear_msg": "Entrez un nouveau texte pour générer un embedding.",
+        "clear_msg": "Entrez un nouveau texte pour générer un embedding."
     },
     "en": {
         "title": "🧠 Tian-Dao Embeddings Demo",
         "subtitle": "### Endoregulated AI - 64→20 Invariant with Wuxing Cycle",
         "description": (
             "This demo transforms your text into a unique 20D embedding via a "
-            "**non-connectionist dynamic system**. The system alternates between "
-            "**SHENG** (exploration) and **KE** (contraction) regimes according to a "
+            "non-connectionist dynamic system. The system alternates between "
+            "SHENG (exploration) and KE (contraction) regimes according to a "
             "self-regulation cycle inspired by Wuxing."
         ),
         "language_label": "🌐 Language",
@@ -123,7 +122,7 @@ I18N = {
         "submit_btn": "🔮 Generate embedding",
         "clear_btn": "🗑️ Clear",
         "metrics_title": "📊 Detailed metrics",
-        "stats_waiting": "**Statistics:** waiting for input...",
+        "stats_waiting": "Statistics: waiting for input...",
         "plot_label": "Embedding visualization",
         "examples_title": "### 📝 Example texts",
         "examples_label": "Click an example to load it",
@@ -135,17 +134,17 @@ I18N = {
             "The topology of attractors reveals harmony"
         ],
         "error_empty": "⚠️ Please enter a valid text.",
-        "error_prefix": "❌ **Error:**",
-        "info_prefix": "**Text analysis:**",
-        "info_attractor": "**Attractor:**",
-        "info_eta": "**Asymmetry η:**",
-        "info_frustration": "**Frustration E:**",
-        "info_threshold": "**Threshold R:**",
-        "info_regime": "**Regime:**",
-        "info_20d": "**20D Embedding:**",
-        "info_768d": "**768D Embedding:**",
-        "info_compression": "**Compression ratio:**",
-        "info_processed": "**Inputs processed:**",
+        "error_prefix": "❌ Error:",
+        "info_prefix": "Text analysis:",
+        "info_attractor": "Attractor:",
+        "info_eta": "Asymmetry η:",
+        "info_frustration": "Frustration E:",
+        "info_threshold": "Threshold R:",
+        "info_regime": "Regime:",
+        "info_20d": "20D Embedding:",
+        "info_768d": "768D Embedding:",
+        "info_compression": "Compression ratio:",
+        "info_processed": "Inputs processed:",
         "dims": "dims",
         "size": "size",
         "bytes": "bytes",
@@ -160,19 +159,17 @@ I18N = {
         "embedding_title": "20D Embedding (attractor {})",
         "dimension": "Dimension",
         "value": "Value",
-        "clear_msg": "Enter a new text to generate an embedding.",
+        "clear_msg": "Enter a new text to generate an embedding."
     }
 }
-
 
 def _(key: str, lang: str = "fr") -> str:
     """Retourne la traduction d'une clé dans la langue donnée."""
     return I18N.get(lang, I18N["fr"]).get(key, I18N["fr"].get(key, key))
 
-
-# ============================================================================
+# =============================================================================
 # FONCTIONS DE TRAITEMENT
-# ============================================================================
+# =============================================================================
 def text_to_embedding(text: str) -> tuple:
     """
     Convertit un texte en un embedding de 20 dimensions unique.
@@ -221,7 +218,6 @@ def text_to_embedding(text: str) -> tuple:
         print(f"Erreur dans text_to_embedding: {e}")
         traceback.print_exc()
         raise
-
 
 def visualize_embedding(text: str, points_cache: list, lang: str = 'fr') -> tuple:
     """
@@ -346,10 +342,9 @@ def visualize_embedding(text: str, points_cache: list, lang: str = 'fr') -> tupl
         if fig is not None:
             plt.close(fig)
 
-
-# ============================================================================
+# =============================================================================
 # INTERFACE GRADIO
-# ============================================================================
+# =============================================================================
 def create_interface() -> gr.Blocks:
     """Crée l'interface Gradio pour la démonstration (bilingue FR/EN)."""
     with gr.Blocks(title="Tian-Dao Embeddings Demo") as demo:
@@ -382,7 +377,7 @@ def create_interface() -> gr.Blocks:
                 submit_btn = gr.Button(_("submit_btn", "fr"), variant="primary")
                 clear_btn = gr.Button(_("clear_btn", "fr"))
                 
-                # ✅ Dropdown pour les exemples (dynamique)
+                # Dropdown pour les exemples (dynamique)
                 examples_title_md = gr.Markdown(_("examples_title", "fr"))
                 examples_dropdown = gr.Dropdown(
                     choices=I18N["fr"]["examples"],
@@ -474,14 +469,14 @@ def create_interface() -> gr.Blocks:
             outputs=[plot_output, stats_text, points_state]
         )
         
-        # ✅ Handler pour le dropdown des exemples
+        # Handler pour le dropdown des exemples
         examples_dropdown.change(
             fn=load_example,
             inputs=examples_dropdown,
             outputs=text_input
         )
         
-        # ✅ Changement de langue avec mise à jour du dropdown
+        # Changement de langue avec mise à jour du dropdown
         language_selector.change(
             fn=change_language,
             inputs=[language_selector, text_input, points_state],
@@ -504,14 +499,14 @@ def create_interface() -> gr.Blocks:
     
     return demo
 
-    
-    # ============================================================================
+# =============================================================================
 # POINT D'ENTRÉE PRINCIPAL
-# ============================================================================
+# =============================================================================
 if __name__ == "__main__":
+    print(">>> RUNNING VERSION 1.4 BILINGUE <<<")  # Pour vérifier dans les logs HF
     demo = create_interface()
     demo.launch(
-        server_name="0.0.0.0",      # ✅ Important pour HF Spaces
-        server_port=7860,            # ✅ Port par défaut
-        ssr_mode=False               # ✅ Désactiver SSR
+        server_name="0.0.0.0",      # Important pour HF Spaces
+        server_port=7860,            # Port par défaut
+        ssr_mode=False               # Désactiver SSR
     )
