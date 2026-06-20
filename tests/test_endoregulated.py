@@ -14,8 +14,16 @@ Usage :
     pytest tests/test_endoregulated.py -v
 """
 
+import sys
+import os
 import pytest
 import numpy as np
+
+# ✅ Ajouter le chemin parent pour les imports
+# Le dossier tests/ est un sous-dossier de Tian-Dao-LLM/
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+# Import depuis la racine du projet
 from Endoregulated_AI_v27 import (
     EndoRegulatedCore,
     RandomInputSimulator,
