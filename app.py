@@ -1,7 +1,7 @@
 """
 Module: app.py
 Application Gradio pour la démonstration de l'IA endorégulée Tian-Dao.
-Version: 1.4  # [P0+P1+20D+i18n FR/EN] corrections appliquées
+Version: 1.4
 Date: 2026-06-20
 """
 import warnings
@@ -17,11 +17,9 @@ import traceback
 import sys
 import os
 
-# Supprimer les warnings asyncio pour Python 3.13
 warnings.filterwarnings("ignore", category=DeprecationWarning, module="asyncio")
 warnings.filterwarnings("ignore", category=RuntimeWarning, module="asyncio")
 
-# Patch pour le bug du file descriptor -1 sur Python 3.13
 if sys.version_info >= (3, 13):
     try:
         import selectors
@@ -40,28 +38,16 @@ if sys.version_info >= (3, 13):
     except Exception:
         pass
 
-# Import direct depuis la racine
 from Endoregulated_AI_v27 import EndoRegulatedCore, RandomInputSimulator, get_core_lock
 
-# =============================================================================
-# [P0-C] INITIALISATION GLOBALE THREAD-SAFE
-# =============================================================================
 core = EndoRegulatedCore(noise_level=0.15, seed=42)
 core_lock = get_core_lock()
 
-# =============================================================================
-# INTERNATIONALISATION (FR/EN)
-# =============================================================================
 I18N = {
     "fr": {
         "title": "🧠 Démo Tian-Dao Embeddings",
         "subtitle": "### IA Endorégulée - Invariant 64→20 avec Cycle Wuxing",
-        "description": (
-            "Cette démo transforme votre texte en un embedding 20D unique via un "
-            "système dynamique non-connexionniste. Le système alterne entre les "
-            "régimes SHENG (exploration) et KE (contraction) selon un cycle "
-            "d'auto-régulation inspiré du Wuxing."
-        ),
+        "description": "Cette démo transforme votre texte en un embedding 20D unique via un système dynamique non-connexionniste. Le système alterne entre les régimes SHENG (exploration) et KE (contraction) selon un cycle d'auto-régulation inspiré du Wuxing.",
         "language_label": "🌐 Langue",
         "text_label": "Texte à encoder",
         "text_placeholder": "Saisissez votre texte ici...",
@@ -110,12 +96,7 @@ I18N = {
     "en": {
         "title": "🧠 Tian-Dao Embeddings Demo",
         "subtitle": "### Endoregulated AI - 64→20 Invariant with Wuxing Cycle",
-        "description": (
-            "This demo transforms your text into a unique 20D embedding via a "
-            "non-connectionist dynamic system. The system alternates between "
-            "SHENG (exploration) and KE (contraction) regimes according to a "
-            "self-regulation cycle inspired by Wuxing."
-        ),
+        "description": "This demo transforms your text into a unique 20D embedding via a non-connectionist dynamic system. The system alternates between SHENG (exploration) and KE (contraction) regimes according to a self-regulation cycle inspired by Wuxing.",
         "language_label": "🌐 Language",
         "text_label": "Text to encode",
         "text_placeholder": "Enter your text here...",
@@ -164,21 +145,9 @@ I18N = {
 }
 
 def _(key: str, lang: str = "fr") -> str:
-    """Retourne la traduction d'une clé dans la langue donnée."""
     return I18N.get(lang, I18N["fr"]).get(key, I18N["fr"].get(key, key))
 
-# =============================================================================
-# FONCTIONS DE TRAITEMENT
-# =============================================================================
 def text_to_embedding(text: str) -> tuple:
-    """
-    Convertit un texte en un embedding de 20 dimensions unique.
-    Chaque dimension correspond à un attracteur (classe d'équivalence
-    topologique du schème 64→20 de Cl(6,0)).
-    
-    Returns:
-        tuple: (embedding_20d, embedding_768d, attractor)
-    """
     try:
         digest = hashlib.sha256(text.encode('utf-8')).digest()
         hash_val = int.from_bytes(digest[:2], 'big') % 64
@@ -220,26 +189,13 @@ def text_to_embedding(text: str) -> tuple:
         raise
 
 def visualize_embedding(text: str, points_cache: list, lang: str = 'fr') -> tuple:
-    """
-    Fonction principale de visualisation pour l'interface Gradio.
-    
-    Args:
-        text (str): Texte à encoder.
-        points_cache (list): Cache des embeddings pour la PCA (par session).
-        lang (str): Langue ('fr' ou 'en').
-    
-    Returns:
-        tuple: (figure, texte_info, points_cache_mis_à_jour)
-    """
     fig = None
     try:
         if not text or not text.strip():
             return None, _("error_empty", lang), points_cache
         
-        # 1. Génération de l'embedding
         emb_20d, emb_768d, attractor = text_to_embedding(text)
         
-        # 2. Récupération des métriques
         with core_lock:
             eta = core.eta_direct()
             frustration = core.frustration()
@@ -247,10 +203,8 @@ def visualize_embedding(text: str, points_cache: list, lang: str = 'fr') -> tupl
             regime = core.get_regime().value
             input_counter = core.input_counter
         
-        # 3. Création de la visualisation
         fig, axes = plt.subplots(1, 2, figsize=(12, 5))
         
-        # GRAPHIQUE 1 : Barres de l'embedding 20D
         ax1 = axes[0]
         colors = ['blue' if v > 0 else 'red' for v in emb_20d]
         bars = ax1.bar(range(1, len(emb_20d) + 1), emb_20d, color=colors, alpha=0.7)
@@ -269,7 +223,6 @@ def visualize_embedding(text: str, points_cache: list, lang: str = 'fr') -> tupl
                      va='bottom' if height > 0 else 'top',
                      fontsize=8)
         
-        # GRAPHIQUE 2 : Projection 2D via PCA
         ax2 = axes[1]
         
         if points_cache is None:
@@ -315,7 +268,6 @@ def visualize_embedding(text: str, points_cache: list, lang: str = 'fr') -> tupl
         
         plt.tight_layout()
         
-        # 4. Construction des informations textuelles
         info_text = (
             f"{_('info_prefix', lang)} `{text[:50]}{'...' if len(text) > 50 else ''}`\n\n"
             f"{_('info_attractor', lang)} {attractor}\n"
@@ -342,17 +294,11 @@ def visualize_embedding(text: str, points_cache: list, lang: str = 'fr') -> tupl
         if fig is not None:
             plt.close(fig)
 
-# =============================================================================
-# INTERFACE GRADIO
-# =============================================================================
 def create_interface() -> gr.Blocks:
-    """Crée l'interface Gradio pour la démonstration (bilingue FR/EN)."""
     with gr.Blocks(title="Tian-Dao Embeddings Demo") as demo:
-        # État par session utilisateur
         points_state = gr.State(value=[])
         lang_state = gr.State(value="fr")
         
-        # Sélecteur de langue (en haut à droite)
         with gr.Row():
             gr.Markdown("## 🧠 Tian-Dao")
             language_selector = gr.Dropdown(
@@ -363,7 +309,6 @@ def create_interface() -> gr.Blocks:
                 interactive=True
             )
         
-        # Titre et description (mis à jour dynamiquement)
         title_md = gr.Markdown(f"# {_('title', 'fr')}\n{_('subtitle', 'fr')}")
         description_md = gr.Markdown(_("description", "fr"))
         
@@ -377,7 +322,6 @@ def create_interface() -> gr.Blocks:
                 submit_btn = gr.Button(_("submit_btn", "fr"), variant="primary")
                 clear_btn = gr.Button(_("clear_btn", "fr"))
                 
-                # Dropdown pour les exemples (dynamique)
                 examples_title_md = gr.Markdown(_("examples_title", "fr"))
                 examples_dropdown = gr.Dropdown(
                     choices=I18N["fr"]["examples"],
@@ -392,7 +336,6 @@ def create_interface() -> gr.Blocks:
             with gr.Column(scale=3):
                 plot_output = gr.Plot(label=_("plot_label", "fr"))
         
-        # --- Handlers ---
         def submit_text(text: str, points_cache: list, lang: str) -> tuple:
             if not text or not text.strip():
                 return None, f"**{_('error_empty', lang)}**", points_cache
@@ -402,11 +345,9 @@ def create_interface() -> gr.Blocks:
             return "", None, _("clear_msg", lang), []
         
         def load_example(example: str) -> str:
-            """Charge un exemple dans le champ texte."""
             return example if example else ""
         
         def change_language(lang: str, current_text: str, points_cache: list):
-            """Met à jour l'interface quand la langue change."""
             new_title = f"# {_('title', lang)}\n{_('subtitle', lang)}"
             new_description = _("description", lang)
             new_examples_title = _("examples_title", lang)
@@ -450,7 +391,6 @@ def create_interface() -> gr.Blocks:
                     points_cache,
                 )
         
-        # Connexions des événements
         submit_btn.click(
             fn=submit_text,
             inputs=[text_input, points_state, lang_state],
@@ -469,14 +409,12 @@ def create_interface() -> gr.Blocks:
             outputs=[plot_output, stats_text, points_state]
         )
         
-        # Handler pour le dropdown des exemples
         examples_dropdown.change(
             fn=load_example,
             inputs=examples_dropdown,
             outputs=text_input
         )
         
-        # Changement de langue avec mise à jour du dropdown
         language_selector.change(
             fn=change_language,
             inputs=[language_selector, text_input, points_state],
@@ -499,14 +437,11 @@ def create_interface() -> gr.Blocks:
     
     return demo
 
-# =============================================================================
-# POINT D'ENTRÉE PRINCIPAL
-# =============================================================================
 if __name__ == "__main__":
-    print(">>> RUNNING VERSION 1.4 BILINGUE <<<")  # Pour vérifier dans les logs HF
+    print(">>> RUNNING VERSION 1.4 BILINGUE <<<")
     demo = create_interface()
     demo.launch(
-        server_name="0.0.0.0",      # Important pour HF Spaces
-        server_port=7860,            # Port par défaut
-        ssr_mode=False               # Désactiver SSR
+        server_name="0.0.0.0",
+        server_port=7860,
+        ssr_mode=False
     )
