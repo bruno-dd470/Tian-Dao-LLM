@@ -88,9 +88,9 @@ class TianDaoEncoder20D:
     """
     Encodeur Tian-Dao produisant des embeddings de 20 dimensions.
     
-    VERSION CORRIGÉE : Utilise une approche "Bag of Attractors" pour
-    capturer la similarité sémantique via la fréquence des attracteurs
-    visités par les mots du texte.
+    VERSION CORRIGÉE : Utilise la même approche que app.py :
+    signature de polarité des 20 triplets de pentades (Table 1 du PDF).
+    Chaque dimension = un attracteur avec sa signature de polarité.
     
     Caractéristiques :
         - Dimension : 20
@@ -124,66 +124,77 @@ class TianDaoEncoder20D:
 
     def encode(self, text: str) -> np.ndarray:
         """
-        Encode un texte en un vecteur 20D via "Bag of Attractors".
+        Encode un texte en un vecteur 20D via signature de polarité des triplets.
         
-        Algorithme :
-            1. Tokeniser le texte en mots
-            2. Pour chaque mot, calculer le hash SHA-256
-            3. Déterminer l'attracteur cible (hash % 20)
-            4. Incrémenter un compteur pour cet attracteur
-            5. Normaliser le vecteur de compteurs (L2 norm)
-            6. Ajouter une modulation basée sur les pentades
+        Cette approche est IDENTIQUE à text_to_embedding() dans app.py :
+        - 20 triplets de pentades (Table 1 du PDF complexity.pdf)
+        - Chaque dimension = signature de polarité d'un attracteur
+        - Signature = (n_positive - n_negative) / 3
         
         Args:
             text: Le texte à encoder.
         
         Returns:
-            np.ndarray: Vecteur de shape (20,) avec valeurs dans [0, 1].
+            np.ndarray: Vecteur de shape (20,) avec valeurs dans [-1, 1].
         """
-        # 1. Tokeniser le texte
-        tokens = self._tokenize(text)
+        # 20 triplets de pentades (Table 1 du PDF complexity.pdf)
+        ATTRACTOR_TRIPLETS = [
+            # 3P (3 classes) - pôles géométriquement isolés
+            ['P1', 'P2', 'P4'],  # A: Methionine
+            ['P1', 'P3', 'P5'],  # B: Tryptophan
+            ['P2', 'P3', 'P6'],  # C: Phenylalanine
+            # 2P+1N (5 classes) - faces/arrêtes primaires
+            ['P4', 'P5', 'N2'],  # D: Isoleucine
+            ['P5', 'P6', 'N3'],  # E: Valine
+            ['P1', 'P6', 'N4'],  # F: Proline
+            ['P2', 'P5', 'N6'],  # G: Threonine
+            ['P3', 'P4', 'N6'],  # H: Alanine
+            # 1P+2N (11 classes) - sommets/diagonales/intersections
+            ['P1', 'N2', 'N6'],  # I: Serine
+            ['P1', 'N3', 'N5'],  # J: Leucine
+            ['P2', 'N3', 'N5'],  # K: Arginine
+            ['P3', 'N2', 'N4'],  # L: Glycine
+            ['P4', 'N1', 'N3'],  # M: Tyrosine
+            ['P4', 'N5', 'N6'],  # N: Histidine
+            ['P5', 'N1', 'N4'],  # O: Glutamine
+            ['P6', 'N1', 'N2'],  # P: Asparagine
+            ['P2', 'N1', 'N4'],  # Q: Lysine
+            ['P3', 'N1', 'N5'],  # R: Aspartic acid
+            ['P6', 'N5', 'N6'],  # S: Glutamic acid
+            # 3N (1 classe) - coeur interne (seuil fonctionnel)
+            ['N2', 'N3', 'N4'],  # T: Cysteine + STOP
+        ]
         
-        if not tokens:
-            # Texte vide ou sans mots
-            return np.zeros(20, dtype=np.float32)
+        # Hash SHA-256 du texte (même logique que app.py)
+        digest = hashlib.sha256(text.encode('utf-8')).digest()
+        hash_val = int.from_bytes(digest[:2], 'big') % 64
         
-        # 2. Compter les attracteurs visités
-        attractor_counts = np.zeros(20, dtype=np.float32)
-        
-        for token in tokens:
-            # Hash SHA-256 du mot
-            digest = hashlib.sha256(token.encode('utf-8')).digest()
-            hash_val = int.from_bytes(digest[:2], 'big') % 64
+        # Calcul de l'embedding 20D (signature de polarité)
+        embedding = []
+        for triplet in ATTRACTOR_TRIPLETS:
+            # Compter les pentades positives et négatives
+            n_positive = sum(1 for p in triplet if p.startswith('P'))
+            n_negative = sum(1 for p in triplet if p.startswith('N'))
             
-            # Attracteur cible
-            attractor_idx = hash_val % 20
-            attractor_counts[attractor_idx] += 1
+            # Signature de polarité normalisée [-1, +1]
+            # 3P → +1.0, 2P+1N → +0.333, 1P+2N → -0.333, 3N → -1.0
+            polarity_score = (n_positive - n_negative) / 3.0
+            
+            # Modulation par le hash pour variabilité spécifique au texte
+            mod = 1.0 if (hash_val + len(embedding)) % 5 != 0 else -1.0
+            embedding.append(polarity_score * mod)
         
-        # 3. Normaliser (L2 norm)
-        norm = np.linalg.norm(attractor_counts)
-        if norm > 0:
-            attractor_counts = attractor_counts / norm
+        # Convertir en array numpy
+        emb = np.array(embedding, dtype=np.float32)
         
-        # 4. Modulation par les pentades (optionnel, pour ajouter de la richesse)
-        # On utilise le hash du texte complet pour moduler
-        full_digest = hashlib.sha256(text.encode('utf-8')).digest()
-        full_hash = int.from_bytes(full_digest[:2], 'big') % 64
+        # Bruit déterministe (même logique que app.py)
+        rng = np.random.default_rng(hash_val)
+        emb = emb + rng.standard_normal(20).astype(np.float32) * 0.15
         
-        # Créer un core frais pour obtenir les modes des attracteurs
-        fresh_core = EndoRegulatedCore(noise_level=0.0, seed=full_hash)
-        fresh_core.encode_bits(full_hash)
+        # Normalisation et clipping
+        emb = np.clip(emb, -1.0, 1.0)
         
-        # Moduler par les modes des attracteurs (+1/-1)
-        for i, name in enumerate(self.attractor_names):
-            mode = fresh_core.attractor_mode[name]
-            attractor_counts[i] *= (0.5 + 0.5 * mode)  # [0, 1] au lieu de [-1, 1]
-        
-        # 5. Bruit reproductible (faible)
-        rng = np.random.default_rng(full_hash)
-        attractor_counts = attractor_counts + rng.standard_normal(20).astype(np.float32) * 0.05
-        attractor_counts = np.clip(attractor_counts, 0.0, 1.0)
-        
-        return attractor_counts
+        return emb
 
     def encode_batch(self, texts: List[str]) -> np.ndarray:
         """Encode une liste de textes. Retourne un array (N, 20)."""
