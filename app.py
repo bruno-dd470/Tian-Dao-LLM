@@ -504,14 +504,14 @@ def create_interface() -> gr.Blocks:
     
     return demo
 
-
-# ============================================================================
+    
+    # ============================================================================
 # POINT D'ENTRÉE PRINCIPAL
 # ============================================================================
 if __name__ == "__main__":
     demo = create_interface()
     demo.launch(
-        server_name="127.0.0.1",
-        server_port=7860,
-        ssr_mode=False  # ✅ Désactiver SSR pour éviter les problèmes asyncio
+        server_name="0.0.0.0",      # ✅ Important pour HF Spaces
+        server_port=7860,            # ✅ Port par défaut
+        ssr_mode=False               # ✅ Désactiver SSR
     )
