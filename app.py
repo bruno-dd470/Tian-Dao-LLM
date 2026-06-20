@@ -43,47 +43,22 @@ def text_to_embedding(text: str) -> tuple:
         hash_val = int.from_bytes(digest[:2], 'big') % 64
         
         # 20 triplets de pentades (Table 1 du PDF complexity.pdf)
-        # Chaque triplet identifie un attracteur de la Merkabah
         ATTRACTOR_TRIPLETS = [
-            # 3P (3 classes) - pôles géométriquement isolés
-            ['P1', 'P2', 'P4'],  # A: Methionine
-            ['P1', 'P3', 'P5'],  # B: Tryptophan
-            ['P2', 'P3', 'P6'],  # C: Phenylalanine
-            # 2P+1N (5 classes) - faces/arrêtes primaires
-            ['P4', 'P5', 'N2'],  # D: Isoleucine
-            ['P5', 'P6', 'N3'],  # E: Valine
-            ['P1', 'P6', 'N4'],  # F: Proline
-            ['P2', 'P5', 'N6'],  # G: Threonine
-            ['P3', 'P4', 'N6'],  # H: Alanine
-            # 1P+2N (11 classes) - sommets/diagonales/intersections
-            ['P1', 'N2', 'N6'],  # I: Serine
-            ['P1', 'N3', 'N5'],  # J: Leucine
-            ['P2', 'N3', 'N5'],  # K: Arginine
-            ['P3', 'N2', 'N4'],  # L: Glycine
-            ['P4', 'N1', 'N3'],  # M: Tyrosine
-            ['P4', 'N5', 'N6'],  # N: Histidine
-            ['P5', 'N1', 'N4'],  # O: Glutamine
-            ['P6', 'N1', 'N2'],  # P: Asparagine
-            ['P2', 'N1', 'N4'],  # Q: Lysine
-            ['P3', 'N1', 'N5'],  # R: Aspartic acid
-            ['P6', 'N5', 'N6'],  # S: Glutamic acid
-            # 3N (1 classe) - coeur interne (seuil fonctionnel)
-            ['N2', 'N3', 'N4'],  # T: Cysteine + STOP
+            ['P1', 'P2', 'P4'], ['P1', 'P3', 'P5'], ['P2', 'P3', 'P6'],
+            ['P4', 'P5', 'N2'], ['P5', 'P6', 'N3'], ['P1', 'P6', 'N4'],
+            ['P2', 'P5', 'N6'], ['P3', 'P4', 'N6'], ['P1', 'N2', 'N6'],
+            ['P1', 'N3', 'N5'], ['P2', 'N3', 'N5'], ['P3', 'N2', 'N4'],
+            ['P4', 'N1', 'N3'], ['P4', 'N5', 'N6'], ['P5', 'N1', 'N4'],
+            ['P6', 'N1', 'N2'], ['P2', 'N1', 'N4'], ['P3', 'N1', 'N5'],
+            ['P6', 'N5', 'N6'], ['N2', 'N3', 'N4'],
         ]
         
-        # Calcul de l'embedding 20D
-        # Chaque dimension = signature de polarité d'un attracteur
+        # Calcul de l'embedding 20D (signature de polarité)
         embedding = []
         for triplet in ATTRACTOR_TRIPLETS:
-            # Compter les pentades positives et négatives
             n_positive = sum(1 for p in triplet if p.startswith('P'))
             n_negative = sum(1 for p in triplet if p.startswith('N'))
-            
-            # Signature de polarité normalisée [-1, +1]
-            # 3P → +1.0, 2P+1N → +0.333, 1P+2N → -0.333, 3N → -1.0
             polarity_score = (n_positive - n_negative) / 3.0
-            
-            # Modulation par le hash pour variabilité spécifique au texte
             mod = 1.0 if (hash_val + len(embedding)) % 5 != 0 else -1.0
             embedding.append(polarity_score * mod)
         
