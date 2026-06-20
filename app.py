@@ -4,6 +4,8 @@ Application Gradio pour la démonstration de l'IA endorégulée Tian-Dao.
 Version: 1.4  # [P0+P1+20D+i18n FR/EN] corrections appliquées
 Date: 2026-06-20
 """
+import warnings
+import asyncio
 import gradio as gr
 import numpy as np
 import matplotlib
@@ -12,10 +14,34 @@ import matplotlib.pyplot as plt
 from sklearn.decomposition import PCA
 import hashlib
 import traceback
+import sys
+import os
+
+# ✅ Supprimer les warnings asyncio pour Python 3.13
+warnings.filterwarnings("ignore", category=DeprecationWarning, module="asyncio")
+warnings.filterwarnings("ignore", category=RuntimeWarning, module="asyncio")
+
+# ✅ Patch pour le bug du file descriptor -1 sur Python 3.13
+if sys.version_info >= (3, 13):
+    try:
+        import selectors
+        original_fileobj_to_fd = selectors._fileobj_to_fd
+        
+        def patched_fileobj_to_fd(fileobj):
+            try:
+                fd = original_fileobj_to_fd(fileobj)
+                return fd
+            except ValueError as e:
+                if "Invalid file descriptor" in str(e):
+                    return -1
+                raise
+        
+        selectors._fileobj_to_fd = patched_fileobj_to_fd
+    except Exception:
+        pass
 
 # Import direct depuis la racine
 from Endoregulated_AI_v27 import EndoRegulatedCore, RandomInputSimulator, get_core_lock
-
 
 # ============================================================================
 # [P0-C] INITIALISATION GLOBALE THREAD-SAFE
@@ -137,6 +163,7 @@ I18N = {
         "clear_msg": "Enter a new text to generate an embedding.",
     }
 }
+
 
 def _(key: str, lang: str = "fr") -> str:
     """Retourne la traduction d'une clé dans la langue donnée."""
@@ -330,7 +357,7 @@ def create_interface() -> gr.Blocks:
         points_state = gr.State(value=[])
         lang_state = gr.State(value="fr")
         
-        # Sélecteur de langue
+        # Sélecteur de langue (en haut à droite)
         with gr.Row():
             gr.Markdown("## 🧠 Tian-Dao")
             language_selector = gr.Dropdown(
@@ -341,7 +368,7 @@ def create_interface() -> gr.Blocks:
                 interactive=True
             )
         
-        # Titre et description
+        # Titre et description (mis à jour dynamiquement)
         title_md = gr.Markdown(f"# {_('title', 'fr')}\n{_('subtitle', 'fr')}")
         description_md = gr.Markdown(_("description", "fr"))
         
@@ -483,4 +510,8 @@ def create_interface() -> gr.Blocks:
 # ============================================================================
 if __name__ == "__main__":
     demo = create_interface()
-    demo.launch(server_name="127.0.0.1", server_port=7860)
+    demo.launch(
+        server_name="127.0.0.1",
+        server_port=7860,
+        ssr_mode=False  # ✅ Désactiver SSR pour éviter les problèmes asyncio
+    )
