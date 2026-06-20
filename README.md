@@ -1,6 +1,3 @@
-Voici votre `README.md` mis à jour avec la licence Apache 2.0. Les modifications concernent les badges, la métadonnée et la section licence.
-
-```markdown
 ---
 title: Tian-Dao Embeddings
 emoji: 🧠
@@ -430,40 +427,3 @@ This project is licensed under the **Apache License 2.0** - see the [LICENSE](LI
 
 本项目采用 **Apache License 2.0** 许可证 - 详见 [LICENSE](LICENSE) 文件。
 
-```
-## 📄 License / 许可证
-
-This project is licensed under the **Apache License 2.0** - see the [LICENSE](LICENSE) file for details.
-
-本项目采用 **Apache License 2.0** 许可证 - 详见 [LICENSE](LICENSE) 文件。
-```
-
----
-
-## 🔄 Modifications apportées
-
-| Élément | Avant | Après |
-|---------|-------|-------|
-| **Badge licence** | `CC-BY-4.0` | `Apache%202.0` |
-| **Métadonnée YAML** | `license: cc-by-4.0` | `license: apache-2.0` |
-| **Section Licence** | CC-BY-4.0 | Apache License 2.0 |
-
-## 📝 Instructions pour valider
-
-```bash
-# 1. Vérifier que le fichier LICENSE existe à la racine
-ls -la LICENSE
-
-# 2. Si LICENSE n'existe pas, le créer
-curl -o LICENSE https://www.apache.org/licenses/LICENSE-2.0.txt
-
-# 3. Ajouter les modifications
-git add README.md LICENSE
-
-# 4. Valider
-git commit -m "Switch license from CC-BY-4.0 to Apache 2.0"
-
-# 5. Pousser sur les deux plateformes
-git push origin main
-git push hf main
-```
