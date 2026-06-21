@@ -24,8 +24,10 @@ license: apache-2.0
 
 [![Hugging Face](https://img.shields.io/badge/🤗%20Hugging%20Face-Open%20Demo-blue?style=for-the-badge)](https://waltdod-gradio.hf.space)
 
-👆 Click the badge above to try the interactive demo.
-👆 点击上方徽章体验交互式演示。
+[![Hugging Face README](https://img.shields.io/badge/📄%20Hugging%20Face-README-blue?style=for-the-badge)](https://huggingface.co/spaces/WaltDod/Gradio/blob/main/README.md)
+
+👆 Click the badges above to try the demo or view the README on Hugging Face.
+👆 点击上方徽章体验演示或查看 Hugging Face 上的 README。
 
 ---
 
